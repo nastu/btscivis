@@ -1,0 +1,39 @@
+{
+  "computer": [
+    {
+      "displayName": "bsc-Asmara",
+      "offline": true,
+      "offlineCauseReason": "Działa, Pierdolone"
+    },
+    {
+      "displayName": "bsc-Doha",
+      "offline": false,
+      "offlineCauseReason": "Wyłączone, Kurwa"
+    },
+    {
+      "displayName": "bsc-Praia",
+      "offline": true,
+      "offlineCauseReason": "Działa, Pierdolone"
+    },
+    {
+      "displayName": "bsc-Tokyo",
+      "offline": false,
+      "offlineCauseReason": "Wyłączone, Kurwa"
+    },
+    {
+      "displayName": "bsc-Bangkok",
+      "offline": false,
+      "offlineCauseReason": "Wyłączone, Kurwa"
+    },
+    {
+      "displayName": "bsc-Suva",
+      "offline": true,
+      "offlineCauseReason": "Działa, Pierdolone"
+    },
+    {
+      "displayName": "bsc-Kampala",
+      "offline": true,
+      "offlineCauseReason": "Działa, Pierdolone"
+    }
+  ]
+}
