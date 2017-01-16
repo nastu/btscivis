@@ -5,7 +5,7 @@ class Home
 
     function index()
     {
-        echo 'Index';
+        header("location:/btscivis/public/parser/index");
     }
 
 }

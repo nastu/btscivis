@@ -75,12 +75,9 @@ class Template
 
         if (file_exists($path)) {
             $this->partialBuffer = file_get_contents($path);
-
             foreach ($titleValue as $key => $value) {
-                echo $value;
                 $this->partialBuffer = str_replace(strtoupper('{' . $key . '}'), $value, $this->partialBuffer);
             }
-
             $this->tpl = str_replace('{[' . strtoupper('title') . ']}', $this->partialBuffer, $this->tpl);
             $this->partialBuffer = '';
         } else {

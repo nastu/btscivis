@@ -54,37 +54,24 @@ $nodes = new Template(TEMPLATES_PATH . '/nodes.php');
 </head>
 <body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
 <div class="wrapper">
-
-    <!--<?php //$header->show(); ?>-->
     {[HEADER]}
 
     <!-- Left side column. contains the logo and sidebar -->
-
-    <!--    <?php //$menu->show(); ?>-->
     {[MENU]}
-
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
-            <!--           <?php //$title->show() ?> -->
             {[TITLE]}
         </section>
 
         <!-- Main content -->
         <section class="content">
-
-            <!--           <?php //$nodes->show(); ?> -->
-            <!--            <?php //$data['template']->partialBuffer; ?>-->
-
             {[BODY]}
-
         </section>
         <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->
-
-    <!--    <?php //$footer->show(); ?>-->
     {[FOOTER]}
 </div>
 <!-- ./wrapper -->

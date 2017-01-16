@@ -10,15 +10,110 @@ require_once '../core/Controller.php';
  */
 class Parser extends Controller
 {
+    var $allConfigs = array();
+    var $bsc116 = array();
+    var $bsc126 = array();
+    var $bsc116Run = array();
+    var $bsc126Run = array();
+    var $bsc116Idle = array();
+    var $bsc126Idle = array();
+    var $bsc116Offline = array();
+    var $bsc126Offline = array();
+
+    public function __construct()
+    {
+        $this->sortConfigs();
+    }
+
     public function index()
     {
-        $parsedNodes = $this->parseNodes();
         $template = new Template('../public/templates/index.php');
-        $bsc116 = [];
-        $bsc126 = [];
+        $template->renderBody('header');
+        $template->renderBody('menu');
+        $template->renderBody('footer');
+        $template->renderTitle(['title' => 'Node', 'description' => 'Current node status', 'controller' => 'Parser']);
+        $template->renderBody('body', 'nodes');
+
+
+        $template->renderMultiPartials('bsc116', '../public/templates/partials/singleNode.php', $this->getConfigs('bsc116'), ['displayName',
+            'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color', 'overlay']);
+
+        $template->renderMultiPartials('bsc126', '../public/templates/partials/singleNode.php', $this->getConfigs('bsc126'), ['displayName',
+            'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color', 'overlay']);
+
+        $template->show();
+
+    }
+
+    public function statistics()
+    {
+        $template = new Template('../public/templates/index.php');
+
+        $template->renderBody('header');
+        $template->renderBody('menu');
+        $template->renderBody('footer');
+        $template->renderTitle(['title' => 'Statistics', 'description' => 'Current node usage statistics', 'controller' => 'Parser']);
+        $template->renderBody('body', 'statistics');
+
+        if (count($this->bsc116Run) > 0) {
+            $template->assign('bsc116run', 'BSC 116');
+        }
+        if (count($this->bsc126Run) > 0) {
+            $template->assign('bsc126run', 'BSC 126');
+        }
+        if (count($this->bsc116Idle) > 0) {
+            $template->assign('bsc116idle', 'BSC 116');
+        }
+        if (count($this->bsc126Idle) > 0) {
+            $template->assign('bsc126idle', 'BSC 126');
+        }
+        if (count($this->bsc116Offline) > 0) {
+            $template->assign('bsc116offline', 'BSC 116');
+        }
+        if (count($this->bsc126Offline) > 0) {
+            $template->assign('bsc126offline', 'BSC 126');
+        }
+
+        $template->renderMultiPartials('bsc116run', '../public/templates/partials/singleNodeListed.php', $this->bsc116Run, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->renderMultiPartials('bsc126run', '../public/templates/partials/singleNodeListed.php', $this->bsc126Run, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->renderMultiPartials('bsc116idle', '../public/templates/partials/singleNodeListed.php', $this->bsc116Idle, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->renderMultiPartials('bsc126idle', '../public/templates/partials/singleNodeListed.php', $this->bsc116Idle, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->renderMultiPartials('bsc116offline', '../public/templates/partials/singleNodeListed.php', $this->bsc116Offline, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->renderMultiPartials('bsc126offline', '../public/templates/partials/singleNodeListed.php', $this->bsc126Offline, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
+
+        $template->show();
+
+    }
+
+
+    // PRIVATE FUNCTIONS
+
+    private function parseNodes()
+    {
+        $json = [];
+        try {
+            $url = 'https://fem102-eiffel005.lmera.ericsson.se:8443/jenkins/computer/api/json?pretty=true';
+            $content = file_get_contents($url);
+            $json = json_decode($content, true);
+        } catch (Exception $e) {
+            header("location: /btscivis/public/parser/index");
+        }
+
+        return $json;
+    }
+
+    private function getConfigs($bscName)
+    {
+        $parsedNodes = $this->parseNodes();
+        $bsc = [];
 
         foreach ($parsedNodes['computer'] as $computer) {
-            if (strpos($computer['displayName'], 'bsc') !== false) {
+            if (strpos($computer['displayName'], $bscName) !== false) {
                 $split = split('-', $computer['displayName']);
 
                 $computer['name'] = strtoupper($split[3]);
@@ -29,51 +124,81 @@ class Parser extends Controller
                 if ($computer['idle'] == false && $computer['offline'] == false) {
                     $computer['ionicon'] = 'ion-load-d';
                     $computer['color'] = 'green';
+                    $computer['overlay'] = '<div class="overlay dark"><i class="fa fa-refresh fa-spin"></i></div>';
+                    $computer['callout'] = 'success';
                 } else {
                     $computer['ionicon'] = 'ion-close-round';
                     $computer['color'] = 'red';
+                    $computer['overlay'] = '';
+                    $computer['callout'] = 'danger';
                 }
-                if (empty($computer['offlineCauseReason'])) {
+                if ($computer['idle'] !== true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
                     $computer['offlineCauseReason'] = 'Runnning';
                 }
-
-                if (strpos($computer['displayName'], 'bsc116') !== false) {
-                    array_push($bsc116, $computer);
+                if ($computer['idle'] == true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
+                    $computer['color'] = 'light-blue';
+                    $computer['offlineCauseReason'] = 'Idle';
+                    $computer['callout'] = 'info';
                 }
-
-                if (strpos($computer['displayName'], 'bsc126') !== false) {
-                    array_push($bsc126, $computer);
-                }
+                array_push($bsc, $computer);
             }
         }
 
-        $template->renderBody('header');
-        $template->renderBody('menu');
-        $template->renderBody('footer');
-        $template->renderBody('title');
-        $template->renderTitle(['title' => 'Node', 'description' => 'Current node status', 'controller' => 'Parser']);
-        $template->renderBody('body', 'nodes');
-
-        // TODO: do renderMultiPartials dodać wyświetlanie dla każdego elementu tablicy innej wartości pod tym samym kluczem.
-        $template->renderMultiPartials('bsc116', '../public/templates/partials/singleNode.php', $bsc116, ['displayName',
-            'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color']);
-
-        $template->renderMultiPartials('bsc126', '../public/templates/partials/singleNode.php', $bsc126, ['displayName',
-            'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color']);
-
-        $template->show();
-
+        return $bsc;
     }
 
-    public function parseNodes()
+    private function sortConfigs()
     {
-        $url = 'https://fem102-eiffel005.lmera.ericsson.se:8443/jenkins/computer/api/json?pretty=true';
-        $content = file_get_contents($url);
-//
-//        $file = '../public/json';
-//        $content = file_get_contents($file);
-        $json = json_decode($content, true);
+        $parsedNodes = $this->parseNodes();
+        foreach ($parsedNodes['computer'] as $computer) {
+            if (strpos($computer['displayName'], 'bsc')) {
+                $split = split('-', $computer['displayName']);
 
-        return $json;
+                $computer['name'] = strtoupper($split[3]);
+                $computer['bscnr'] = strtoupper($split[0]);
+                $computer['tgnr'] = strtoupper($split[1]);
+                $computer['confnr'] = strtoupper($split[2]);
+                if ($computer['idle'] == false && $computer['offline'] == false) {
+                    $computer['ionicon'] = 'ion-load-d';
+                    $computer['color'] = 'green';
+                    $computer['overlay'] = '<div class="overlay dark"><i class="fa fa-refresh fa-spin"></i></div>';
+                    $computer['callout'] = 'success';
+
+                    if (strpos($computer['displayName'], 'bsc116')) {
+                        array_push($this->bsc116Run, $computer);
+                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                        array_push($this->bsc126Run, $computer);
+                    }
+                } else {
+                    $computer['ionicon'] = 'ion-close-round';
+                    $computer['color'] = 'red';
+                    $computer['overlay'] = '';
+                    $computer['callout'] = 'danger';
+
+                    if (strpos($computer['displayName'], 'bsc116')) {
+                        array_push($this->bsc116Offline, $computer);
+                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                        array_push($this->bsc126Offline, $computer);
+                    }
+                }
+                if ($computer['idle'] !== true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
+                    $computer['offlineCauseReason'] = 'Runnning';
+                }
+                if ($computer['idle'] == true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
+                    $computer['color'] = 'light-blue';
+                    $computer['offlineCauseReason'] = 'Idle';
+                    $computer['callout'] = 'info';
+
+                    if (strpos($computer['displayName'], 'bsc116')) {
+                        array_push($this->bsc116Idle, $computer);
+                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                        array_push($this->bsc126Idle, $computer);
+                    }
+                }
+                array_push($bsc, $computer);
+
+            }
+            array_push($this->allConfigs, $computer);
+        }
     }
 }
