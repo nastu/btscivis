@@ -12,10 +12,10 @@
 
                 <!-- /.box-tools -->
             </div>
-            <div class="box-body">
-                {BSC116RUN}
+            <div class="box-body text-center">
+                <h3>{BSC116RUN}</h3>
                 [BSC116RUN]
-                {BSC126RUN}
+                <h3>{BSC126RUN}</h3>
                 [BSC126RUN]
             </div>
         </div>
@@ -33,10 +33,16 @@
                 <!-- /.box-tools -->
             </div>
             <div class="box-body">
-                {BSC116IDLE}
-                [BSC116IDLE]
-                {BSC126IDLE}
-                [BSC126IDLE]
+                <div class="col-lg-12">
+                    <div class="box-group text-center">
+                        <h3>{BSC116IDLE}</h3>
+                        [BSC116IDLE]
+                    </div>
+                    <div class="box-group text-center">
+                        <h3>{BSC126IDLE}</h3>
+                        [BSC126IDLE]
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -53,10 +59,16 @@
                 <!-- /.box-tools -->
             </div>
             <div class="box-body">
-                {BSC116OFFLINE}
-                [BSC116OFFLINE]
-                {BSC126OFFLINE}
-                [BSC126OFFLINE]
+                <div class="col-lg-12">
+                    <div class="box-group text-center">
+                        <h3>{BSC116OFFLINE}</h3>
+                        [BSC116OFFLINE]
+                    </div>
+                    <div class="box-group text-center">
+                        <h3>{BSC126OFFLINE}</h3>
+                        [BSC126OFFLINE]
+                    </div>
+                </div>
             </div>
         </div>
         <!-- /.info-box -->

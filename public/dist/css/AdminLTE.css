@@ -2870,6 +2870,11 @@ a:focus {
     line-height: normal;
 }
 
+.img-padding5 {
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
 .alert .close {
     color: #000;
     opacity: 0.2;

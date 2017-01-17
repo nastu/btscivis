@@ -10,20 +10,26 @@ require_once '../core/Controller.php';
  */
 class Parser extends Controller
 {
-    var $allConfigs = array();
-    var $bsc116 = array();
-    var $bsc126 = array();
-    var $bsc116Run = array();
-    var $bsc126Run = array();
-    var $bsc116Idle = array();
-    var $bsc126Idle = array();
-    var $bsc116Offline = array();
-    var $bsc126Offline = array();
 
+
+    public $allConfigs = [];
+    public $bsc116 = [];
+    public $bsc126 = [];
+    public $bsc116Run = [];
+    public $bsc126Run = [];
+    public $bsc116Idle = [];
+    public $bsc126Idle = [];
+    public $bsc116Offline = [];
+    public $bsc126Offline = [];
+
+    /**
+     * Parser constructor.
+     */
     public function __construct()
     {
         $this->sortConfigs();
     }
+
 
     public function index()
     {
@@ -34,18 +40,18 @@ class Parser extends Controller
         $template->renderTitle(['title' => 'Node', 'description' => 'Current node status', 'controller' => 'Parser']);
         $template->renderBody('body', 'nodes');
 
-
-        $template->renderMultiPartials('bsc116', '../public/templates/partials/singleNode.php', $this->getConfigs('bsc116'), ['displayName',
+        $template->renderMultiPartials('bsc116', '../public/templates/partials/singleNode.php', $this->bsc116, ['displayName',
             'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color', 'overlay']);
 
-        $template->renderMultiPartials('bsc126', '../public/templates/partials/singleNode.php', $this->getConfigs('bsc126'), ['displayName',
+        $template->renderMultiPartials('bsc126', '../public/templates/partials/singleNode.php', $this->bsc126, ['displayName',
             'offline', 'offlineCauseReason', 'name', 'bscnr', 'tgnr', 'confnr', 'ionicon', 'color', 'overlay']);
 
         $template->show();
 
     }
 
-    public function statistics()
+    public
+    function statistics()
     {
         $template = new Template('../public/templates/index.php');
 
@@ -74,16 +80,18 @@ class Parser extends Controller
             $template->assign('bsc126offline', 'BSC 126');
         }
 
+        $template->assign('bsc116run', 'BSC116');
+        $template->assign('bsc126run', 'BSC126');
+        $template->assign('bsc116idle', 'BSC116');
+        $template->assign('bsc126idle', 'BSC126');
+        $template->assign('bsc116offline', 'BSC116');
+        $template->assign('bsc126offline', 'BSC126');
+
         $template->renderMultiPartials('bsc116run', '../public/templates/partials/singleNodeListed.php', $this->bsc116Run, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
-
         $template->renderMultiPartials('bsc126run', '../public/templates/partials/singleNodeListed.php', $this->bsc126Run, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
-
         $template->renderMultiPartials('bsc116idle', '../public/templates/partials/singleNodeListed.php', $this->bsc116Idle, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
-
         $template->renderMultiPartials('bsc126idle', '../public/templates/partials/singleNodeListed.php', $this->bsc116Idle, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
-
         $template->renderMultiPartials('bsc116offline', '../public/templates/partials/singleNodeListed.php', $this->bsc116Offline, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
-
         $template->renderMultiPartials('bsc126offline', '../public/templates/partials/singleNodeListed.php', $this->bsc126Offline, ['name', 'bscnr', 'tgnr', 'confnr', 'callout']);
 
         $template->show();
@@ -91,9 +99,10 @@ class Parser extends Controller
     }
 
 
-    // PRIVATE FUNCTIONS
+// PRIVATE FUNCTIONS
 
-    private function parseNodes()
+    private
+    function parseNodes()
     {
         $json = [];
         try {
@@ -107,7 +116,8 @@ class Parser extends Controller
         return $json;
     }
 
-    private function getConfigs($bscName)
+    private
+    function getConfigs($bscName)
     {
         $parsedNodes = $this->parseNodes();
         $bsc = [];
@@ -151,9 +161,8 @@ class Parser extends Controller
     {
         $parsedNodes = $this->parseNodes();
         foreach ($parsedNodes['computer'] as $computer) {
-            if (strpos($computer['displayName'], 'bsc')) {
+            if (strpos($computer['displayName'], 'bsc') !== false) {
                 $split = split('-', $computer['displayName']);
-
                 $computer['name'] = strtoupper($split[3]);
                 $computer['bscnr'] = strtoupper($split[0]);
                 $computer['tgnr'] = strtoupper($split[1]);
@@ -163,42 +172,46 @@ class Parser extends Controller
                     $computer['color'] = 'green';
                     $computer['overlay'] = '<div class="overlay dark"><i class="fa fa-refresh fa-spin"></i></div>';
                     $computer['callout'] = 'success';
+                    $computer['offlineCauseReason'] = 'Runnning';
 
-                    if (strpos($computer['displayName'], 'bsc116')) {
+                    if (strpos($computer['displayName'], 'bsc116') !== false) {
                         array_push($this->bsc116Run, $computer);
-                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                    } elseif (strpos($computer['displayName'], 'bsc126') !== false) {
                         array_push($this->bsc126Run, $computer);
                     }
-                } else {
+                } elseif($computer['idle'] == true && $computer['offline'] == true) {
                     $computer['ionicon'] = 'ion-close-round';
                     $computer['color'] = 'red';
                     $computer['overlay'] = '';
                     $computer['callout'] = 'danger';
 
-                    if (strpos($computer['displayName'], 'bsc116')) {
+                    if (strpos($computer['displayName'], 'bsc116') !== false) {
                         array_push($this->bsc116Offline, $computer);
-                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                    } elseif (strpos($computer['displayName'], 'bsc126') !== false) {
                         array_push($this->bsc126Offline, $computer);
                     }
                 }
-                if ($computer['idle'] !== true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
-                    $computer['offlineCauseReason'] = 'Runnning';
+                if ($computer['idle'] == true && $computer['offline'] == true && empty($computer['offlineCauseReason'])) {
+                    $computer['offlineCauseReason'] = 'Offline';
                 }
                 if ($computer['idle'] == true && $computer['offline'] !== true && empty($computer['offlineCauseReason'])) {
                     $computer['color'] = 'light-blue';
                     $computer['offlineCauseReason'] = 'Idle';
                     $computer['callout'] = 'info';
 
-                    if (strpos($computer['displayName'], 'bsc116')) {
+                    if (strpos($computer['displayName'], 'bsc116') !== false) {
                         array_push($this->bsc116Idle, $computer);
-                    } elseif (strpos($computer['displayName'], 'bsc126')) {
+                    } elseif (strpos($computer['displayName'], 'bsc126') !== false) {
                         array_push($this->bsc126Idle, $computer);
                     }
                 }
-                array_push($bsc, $computer);
-
+                if (strpos($computer['displayName'], 'bsc116') !== false) {
+                    array_push($this->bsc116, $computer);
+                } elseif (strpos($computer['displayName'], 'bsc126') !== false) {
+                    array_push($this->bsc126, $computer);
+                }
+                array_push($this->allConfigs, $computer);
             }
-            array_push($this->allConfigs, $computer);
         }
     }
 }
